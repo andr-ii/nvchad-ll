@@ -52,6 +52,26 @@ M.general = {
       end,
       "LSP formatting",
     },
+
+    -- copy file name
+    ["<leader>cp"] = {
+      function()
+        local path = vim.fn.expand("%:p")
+        vim.fn.setreg("+", path)
+        vim.notify('Copied "' .. path .. '" to the clipboard!')
+      end,
+      "Copy file path"
+    },
+
+    ["<leader>ct"] = {
+      function()
+        local path = "yarn test " .. vim.fn.expand("%:p")
+        vim.fn.setreg("+", path)
+        vim.notify('Copied "' .. path .. '" to the clipboard!')
+      end,
+      "Copy path for test"
+    }
+
   },
 
   t = {
@@ -139,7 +159,11 @@ M.lspconfig = {
 
     ["gd"] = {
       function()
-        vim.lsp.buf.definition()
+        require('telescope.builtin').lsp_definitions {
+          noremap = true,
+          silent = true,
+          initial_mode = 'normal'
+        }
       end,
       "LSP definition",
     },
@@ -172,7 +196,7 @@ M.lspconfig = {
       "LSP definition type",
     },
 
-    ["<leader>ra"] = {
+    ["<leader>rr"] = {
       function()
         require("nvchad.renamer").open()
       end,
@@ -188,7 +212,12 @@ M.lspconfig = {
 
     ["gr"] = {
       function()
-        vim.lsp.buf.references()
+        require('telescope.builtin').lsp_references {
+          noremap = true,
+          silent = true,
+          initial_mode = 'normal',
+          include_declaration = false
+        }
       end,
       "LSP references",
     },
@@ -203,6 +232,7 @@ M.lspconfig = {
     ["[d"] = {
       function()
         vim.diagnostic.goto_prev { float = { border = "rounded" } }
+        vim.cmd.normal('zz')
       end,
       "Goto prev",
     },
@@ -210,6 +240,7 @@ M.lspconfig = {
     ["]d"] = {
       function()
         vim.diagnostic.goto_next { float = { border = "rounded" } }
+        vim.cmd.normal('zz')
       end,
       "Goto next",
     },
@@ -258,10 +289,10 @@ M.nvimtree = {
 
   n = {
     -- toggle
-    ["<C-n>"] = { "<cmd> NvimTreeToggle <CR>", "Toggle nvimtree" },
+    ["<C-n>"] = { "<cmd> NvimTreeToggle <CR>zz", "Toggle nvimtree" },
 
     -- focus
-    ["<leader>e"] = { "<cmd> NvimTreeFocus <CR>", "Focus nvimtree" },
+    ["<leader>e"] = { "<cmd> NvimTreeFocus <CR>zz", "Focus nvimtree" },
   },
 }
 
@@ -269,25 +300,34 @@ M.telescope = {
   plugin = true,
 
   n = {
-    -- find
-    ["<leader>ff"] = { "<cmd> Telescope find_files <CR>", "Find files" },
-    ["<leader>fa"] = { "<cmd> Telescope find_files follow=true no_ignore=true hidden=true <CR>", "Find all" },
-    ["<leader>fw"] = { "<cmd> Telescope live_grep <CR>", "Live grep" },
-    ["<leader>fb"] = { "<cmd> Telescope buffers <CR>", "Find buffers" },
-    ["<leader>fh"] = { "<cmd> Telescope help_tags <CR>", "Help page" },
-    ["<leader>fo"] = { "<cmd> Telescope oldfiles <CR>", "Find oldfiles" },
-    ["<leader>fz"] = { "<cmd> Telescope current_buffer_fuzzy_find <CR>", "Find in current buffer" },
+    -- search
+    ["<leader>sf"] = { "<cmd> Telescope find_files <CR>", "Search files" },
+    ["<leader>sa"] = { "<cmd> Telescope find_files follow=true no_ignore=true hidden=true <CR>", "Search all" },
+    ["<leader>ss"] = { "<cmd> Telescope live_grep_args <CR>", "Live grep args" },
+    ["<leader><leader>"] = { "<cmd> Telescope buffers initial_mode=normal<CR>", "Search buffers" },
+    ["<leader>sh"] = { "<cmd> Telescope help_tags <CR>", "Help page" },
+    ["<leader>so"] = { "<cmd> Telescope oldfiles <CR>", "Search oldfiles" },
+    ["<leader>sz"] = { "<cmd> Telescope current_buffer_fuzzy_find <CR>", "Search in current buffer" },
+    ["<leader>sx"] = {
+      function()
+        require('telescope.builtin').resume {
+          noremap = true,
+          silent = true,
+          initial_mode = "normal"
+        }
+      end, "Search resume"
+    },
+    -- ["<leader>fw"] = { "<cmd> Telescope live_grep <CR>", "Live grep" },
 
     -- git
-    ["<leader>cm"] = { "<cmd> Telescope git_commits <CR>", "Git commits" },
-    ["<leader>gt"] = { "<cmd> Telescope git_status <CR>", "Git status" },
+    ["<leader>gc"] = { "<cmd> Telescope git_commits initial_mode=normal <CR>", "Git commits" },
+    ["<leader>gs"] = { "<cmd> Telescope git_status initial_mode=normal <CR>", "Git status" },
 
     -- pick a hidden term
     ["<leader>pt"] = { "<cmd> Telescope terms <CR>", "Pick hidden term" },
 
     -- theme switcher
-    ["<leader>th"] = { "<cmd> Telescope themes <CR>", "Nvchad themes" },
-
+    ["<leader>th"] = { "<cmd> Telescope themes initial_mode=normal <CR>", "Nvchad themes" },
     ["<leader>ma"] = { "<cmd> Telescope marks <CR>", "telescope bookmarks" },
   },
 }
@@ -413,6 +453,7 @@ M.gitsigns = {
         end
         vim.schedule(function()
           require("gitsigns").next_hunk()
+          vim.cmd.normal('wzz')
         end)
         return "<Ignore>"
       end,
@@ -427,6 +468,7 @@ M.gitsigns = {
         end
         vim.schedule(function()
           require("gitsigns").prev_hunk()
+          vim.cmd.normal('wzz')
         end)
         return "<Ignore>"
       end,
@@ -435,14 +477,14 @@ M.gitsigns = {
     },
 
     -- Actions
-    ["<leader>rh"] = {
+    ["<leader>gr"] = {
       function()
         require("gitsigns").reset_hunk()
       end,
       "Reset hunk",
     },
 
-    ["<leader>ph"] = {
+    ["<leader>gh"] = {
       function()
         require("gitsigns").preview_hunk()
       end,
@@ -462,6 +504,13 @@ M.gitsigns = {
       end,
       "Toggle deleted",
     },
+
+    ["<leader>gd"] = {
+      function()
+        require("gitsigns").diffthis()
+      end,
+      "Git diff"
+    }
   },
 }
 
