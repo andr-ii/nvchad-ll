@@ -49,6 +49,7 @@ conf.override_hl = function()
   hl(0, '@type.qualifier', { fg = color.blue })
   hl(0, '@conditional', { fg = color.purple })
   hl(0, '@keyword', { fg = color.purple })
+  hl(0, '@exception', { fg = color.purple })
 end
 
 
